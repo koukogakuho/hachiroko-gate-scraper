@@ -60,8 +60,7 @@ def run_scraper():
                         downstream_level = floats_found[1]
                     break
 
-            # 🌟 【修正】リアルタイム全放流量を抽出
-            # ページ内で最初に出てくる「m³/s」の1つ上の行を取得します
+            # 🌟 リアルタイム全放流量を抽出
             for i, line in enumerate(lines):
                 if line == "m³/s":
                     try:
@@ -70,8 +69,8 @@ def run_scraper():
                     except ValueError:
                         pass
                         
-            # 🌟 【テスト用】強制的に開放状態にする！
-            is_open = True
+            # 🌟 本番用：全放流量が0より大きければ開放判定！
+            is_open = total_discharge > 0.0
                     
             browser.close()
 
@@ -98,31 +97,9 @@ def run_scraper():
         }, merge=True)
         print(f"✨ 送信完了 ➔ 放流量:{total_discharge}m³/s / 水門:{'開放' if is_open else '閉鎖'}")
 
-        # 3. もし「閉鎖 ➔ 開放」に変わっていたら通知を一斉送信！
-        if True:
+        # 3. 本番用：もし「閉鎖 ➔ 開放」に変わっていたら通知を一斉送信！
+        if is_open and not previous_is_open:
             print("🚨 水門の開放を検知！名簿の全員にプッシュ通知を送信します！")
             
             # Firestoreの「fcm_tokens」名簿から全員の宛先を取得
-            tokens_snapshot = db.collection('fcm_tokens').get()
-            tokens = [doc.id for doc in tokens_snapshot]
-            
-            if tokens:
-                message = messaging.MulticastMessage(
-                    notification=messaging.Notification(
-                        title='水門アラート🚨',
-                        body=f'八郎湖防潮門が開放されました。（観測日時: {observation_time}）',
-                    ),
-                    tokens=tokens,
-                )
-                response = messaging.send_each_for_multicast(message)
-                print(f'通知送信完了: {response.success_count}件成功 / {response.failure_count}件失敗')
-            else:
-                print("※通知を送る宛先（名簿）が空でした。")
-
-    except Exception as e:
-        print(f"❌ エラーが発生しました（次回ループで再トライ）: {e}")
-
-# ==========================================
-# 🔁 3. 10分おきの無限ループ実行（最長約6時間）
-# ==========================================
-run_scraper()
+            tokens_snapshot = db.collection('f
