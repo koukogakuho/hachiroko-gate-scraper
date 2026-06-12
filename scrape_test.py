@@ -99,7 +99,7 @@ def run_scraper():
         print(f"✨ 送信完了 ➔ 放流量:{total_discharge}m³/s / 水門:{'開放' if is_open else '閉鎖'}")
 
         # 3. もし「閉鎖 ➔ 開放」に変わっていたら通知を一斉送信！
-        if is_open and not previous_is_open:
+        if True:
             print("🚨 水門の開放を検知！名簿の全員にプッシュ通知を送信します！")
             
             # Firestoreの「fcm_tokens」名簿から全員の宛先を取得
