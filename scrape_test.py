@@ -114,7 +114,7 @@ def run_scraper():
                     ),
                     tokens=tokens,
                 )
-                response = messaging.send_multicast(message)
+                response = messaging.send_each_for_multicast(message)
                 print(f'通知送信完了: {response.success_count}件成功 / {response.failure_count}件失敗')
             else:
                 print("※通知を送る宛先（名簿）が空でした。")
