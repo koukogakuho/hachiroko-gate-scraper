@@ -102,4 +102,5 @@ def run_scraper():
             print("🚨 水門の開放を検知！名簿の全員にプッシュ通知を送信します！")
             
             # Firestoreの「fcm_tokens」名簿から全員の宛先を取得
-            tokens_snapshot = db.collection('f
+            tokens_snapshot = db.collection('fcm_tokens').get()
+            tokens = [doc.id for doc in tokens_snapshot]
