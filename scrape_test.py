@@ -127,5 +127,4 @@ def run_scraper():
 # ==========================================
 for loop_count in range(33):
     run_scraper()
-    print("⏳ 次の更新まで10分間待機します...")
-    time.sleep(600)
+    
