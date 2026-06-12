@@ -104,3 +104,28 @@ def run_scraper():
             # Firestoreの「fcm_tokens」名簿から全員の宛先を取得
             tokens_snapshot = db.collection('fcm_tokens').get()
             tokens = [doc.id for doc in tokens_snapshot]
+            
+            if tokens:
+                message = messaging.MulticastMessage(
+                    notification=messaging.Notification(
+                        title='水門アラート🚨',
+                        body=f'八郎湖防潮門が開放されました。（観測日時: {observation_time}）',
+                    ),
+                    tokens=tokens,
+                )
+                response = messaging.send_each_for_multicast(message)
+                print(f'通知送信完了: {response.success_count}件成功 / {response.failure_count}件失敗')
+            else:
+                print("※通知を送る宛先（名簿）が空でした。")
+
+    # ⚠️ ここが消えていた部分です！
+    except Exception as e:
+        print(f"❌ エラーが発生しました（次回ループで再トライ）: {e}")
+
+# ==========================================
+# 🔁 3. 10分おきの無限ループ実行（最長約6時間）
+# ==========================================
+for loop_count in range(33):
+    run_scraper()
+    print("⏳ 次の更新まで10分間待機します...")
+    time.sleep(600)
