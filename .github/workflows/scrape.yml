@@ -26,7 +26,7 @@ jobs:
 
     - name: 暗号ポケットからFirebaseの鍵を復元
       run: |
-        echo '${{ secrets.FIREBASE_KEY }}' > firebase_key.json
+        echo '${{ secrets.FIREBASE_KEY_SECRET }}' > firebase_key.json
 
     - name: スクレイピングを実行
       run: python scrape_test.py
