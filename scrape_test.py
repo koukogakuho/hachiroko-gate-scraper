@@ -70,8 +70,8 @@ def run_scraper():
                     except ValueError:
                         pass
                         
-            # 🌟 開放判定（全放流量が0より大きければ開放！）
-            is_open = total_discharge > 0.0
+            # 🌟 【テスト用】強制的に開放状態にする！
+            is_open = True
                     
             browser.close()
 
