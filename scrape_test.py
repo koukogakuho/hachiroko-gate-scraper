@@ -1,9 +1,10 @@
-import time # 🌟 時間を測るライブラリを追加
+import time
 from playwright.sync_api import sync_playwright
 import re
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
+from firebase_admin import messaging
 
 # ==========================================
 # ⚙️ 1. Firebaseへの接続準備
@@ -35,8 +36,7 @@ def run_scraper():
             upstream_level = 0.0
             downstream_level = 0.0
             total_discharge = 0.0
-            open_gates_count = 0
-            is_open = False
+            open_gates_count = "-" # 仮設定
             
             # 🌟 観測日時を抽出
             for line in lines[:20]:
@@ -59,12 +59,35 @@ def run_scraper():
                         upstream_level = floats_found[0]
                         downstream_level = floats_found[1]
                     break
+
+            # 🌟 【修正】リアルタイム全放流量を抽出
+            # ページ内で最初に出てくる「m³/s」の1つ上の行を取得します
+            for i, line in enumerate(lines):
+                if line == "m³/s":
+                    try:
+                        total_discharge = float(lines[i-1])
+                        break # 最初の1個を見つけたら探索終了
+                    except ValueError:
+                        pass
+                        
+            # 🌟 開放判定（全放流量が0より大きければ開放！）
+            is_open = total_discharge > 0.0
                     
             browser.close()
 
-        # 📡 Firestoreに送信
-        print("Firestoreのデータを更新しています...")
+        # ==========================================
+        # 🔔 通知判定とFirestore更新
+        # ==========================================
         doc_ref = db.collection('gates').document('hachiroko')
+        
+        # 1. 変更前のデータを取得して、以前の状態をチェック
+        doc_snap = doc_ref.get()
+        previous_is_open = False
+        if doc_snap.exists:
+            previous_is_open = doc_snap.to_dict().get('is_open', False)
+
+        # 2. 新しいデータをFirebaseに保存
+        print("Firestoreのデータを更新しています...")
         doc_ref.set({
             'observation_time': observation_time,
             'upstream_level': upstream_level,
@@ -73,17 +96,36 @@ def run_scraper():
             'open_gates_count': open_gates_count,
             'is_open': is_open
         }, merge=True)
+        print(f"✨ 送信完了 ➔ 放流量:{total_discharge}m³/s / 水門:{'開放' if is_open else '閉鎖'}")
 
-        print(f"✨ 送信完了 ➔ 上流:{upstream_level}m / 下流:{downstream_level}m")
-    
+        # 3. もし「閉鎖 ➔ 開放」に変わっていたら通知を一斉送信！
+        if is_open and not previous_is_open:
+            print("🚨 水門の開放を検知！名簿の全員にプッシュ通知を送信します！")
+            
+            # Firestoreの「fcm_tokens」名簿から全員の宛先を取得
+            tokens_snapshot = db.collection('fcm_tokens').get()
+            tokens = [doc.id for doc in tokens_snapshot]
+            
+            if tokens:
+                message = messaging.MulticastMessage(
+                    notification=messaging.Notification(
+                        title='水門アラート🚨',
+                        body=f'八郎湖防潮門が開放されました。（観測日時: {observation_time}）',
+                    ),
+                    tokens=tokens,
+                )
+                response = messaging.send_multicast(message)
+                print(f'通知送信完了: {response.success_count}件成功 / {response.failure_count}件失敗')
+            else:
+                print("※通知を送る宛先（名簿）が空でした。")
+
     except Exception as e:
         print(f"❌ エラーが発生しました（次回ループで再トライ）: {e}")
 
 # ==========================================
 # 🔁 3. 10分おきの無限ループ実行（最長約6時間）
 # ==========================================
-# GitHub Actionsの制限時間（6時間＝360分）に安全に収まるよう、33回（5.5時間分）ループします
 for loop_count in range(33):
     run_scraper()
     print("⏳ 次の更新まで10分間待機します...")
-    time.sleep(600) # 600秒（10分）お休みする命令
+    time.sleep(600)
