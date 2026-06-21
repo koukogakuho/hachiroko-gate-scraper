@@ -22,11 +22,19 @@ def run_scraper():
     print(f"\n【{time.strftime('%X')}】最新の水門データを解析中...")
 
     try:
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
-            page = browser.new_page()
-            page.goto(url)
-            page.wait_for_timeout(10000)
+with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        
+        # 🌟 セキュリティを騙すために「普通のWindows Chrome」の名札（User-Agent）をセット
+        context = browser.new_context(
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+        )
+        
+        # 🌟 pageを browser からではなく context から作るように変更！
+        page = context.new_page()
+        
+        page.goto(url)
+        page.wait_for_timeout(10000)
             
 # 🌟 部屋（フレーム）がいくつあるか調査
             frames = page.frames
