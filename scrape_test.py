@@ -28,7 +28,17 @@ def run_scraper():
             page.goto(url)
             page.wait_for_timeout(10000)
             
-            frame = page.frames[1]
+# 🌟 部屋（フレーム）がいくつあるか調査
+            frames = page.frames
+            print(f"🤖 検出されたフレーム数: {len(frames)}")
+            
+            if len(frames) < 2:
+                print("🚨 画面が正常に開けていない可能性があります！中身をのぞいてみます。")
+                print(f"📄 画面のタイトル ➔ {page.title()}")
+                print(f"📄 画面の文字（最初の200文字） ➔ {page.locator('body').inner_text()[:200]}")
+                raise Exception("水門データの画面が正しく読み込めませんでした。")
+
+            frame = frames[1]
             text = frame.locator("body").inner_text()
             lines = [line.strip() for line in text.split('\n') if line.strip()]
             
