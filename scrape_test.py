@@ -22,21 +22,21 @@ def run_scraper():
     print(f"\n【{time.strftime('%X')}】最新の水門データを解析中...")
 
     try:
-with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
-        
-        # 🌟 セキュリティを騙すために「普通のWindows Chrome」の名札（User-Agent）をセット
-        context = browser.new_context(
-            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
-        )
-        
-        # 🌟 pageを browser からではなく context から作るように変更！
-        page = context.new_page()
-        
-        page.goto(url)
-        page.wait_for_timeout(10000)
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
             
-# 🌟 部屋（フレーム）がいくつあるか調査
+            # 🌟 セキュリティを騙すために「普通のWindows Chrome」の名札（User-Agent）をセット
+            context = browser.new_context(
+                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+            )
+            
+            # 🌟 pageを browser からではなく context から作るように変更！
+            page = context.new_page()
+            
+            page.goto(url)
+            page.wait_for_timeout(10000)
+                
+            # 🌟 部屋（フレーム）がいくつあるか調査
             frames = page.frames
             print(f"🤖 検出されたフレーム数: {len(frames)}")
             
@@ -136,7 +136,6 @@ with sync_playwright() as p:
             else:
                 print("※通知を送る宛先（名簿）が空でした。")
 
-# ⭕ ここから一番下までを丸ごと上書きします（スペースの数を完全に揃えました）
     except Exception as e:
         import traceback
         print("❌ エラーの詳細な原因（ここが犯人です！）:")
