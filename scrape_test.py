@@ -92,7 +92,7 @@ def run_scraper():
             'open_gates_count': open_gates_count,
             'is_open': is_open
         }, merge=True)
-        print(f"✨ 送信完了 ➔ 放流量:{total_discharge}m³/s / 水門:{'開放' if is_open else '閉鎖'}")
+        print(f"✨ 送信完了 ➔ 日時:{observation_time} / 上流:{upstream_level} / 下流:{downstream_level} / 放流:{total_discharge}m³/s")
 
         # もし「閉鎖 ➔ 開放」に変わっていたら通知を一斉送信！
         if is_open and not previous_is_open:
