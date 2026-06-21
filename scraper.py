@@ -19,7 +19,7 @@ db = firestore.client()
 # ==========================================
 def run_scraper():
     # 👇 ここに新しく発行したGASのウェブアプリURLを貼り付けます
-    GAS_URL = "https://script.google.com/macros/s/AKfycbxTdQZDHYDf11YhPgJxqLVc5zBJDdps2Ij-Lbk9QGfowl3knlhhBI6ulWs1suQlsYaQEA/exec"
+    GAS_URL = "https://script.google.com/macros/s/AKfycbxtmkaBay9DPqo1Y44b5ufgTkAt7eSN0iNpnYidgzOE9-CNN6zw_-V77gE-LLRF3KmySg/exec"
     
     print(f"\n【{time.strftime('%X')}】クラウドから生のJSONデータを取得中...")
 
