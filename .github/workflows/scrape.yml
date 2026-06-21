@@ -1,9 +1,9 @@
 name: Hachiroko Gate Scraper
 
 on:
-  schedule:
-    - cron: '*/10 * * * *'
   workflow_dispatch:
+  repository_dispatch:         # 🌟 ここが追加したインターホン！
+    types: [run-scraper]       # 🌟 合言葉は「run-scraper」
 
 jobs:
   scrape:
