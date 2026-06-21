@@ -118,7 +118,8 @@ def run_scraper():
             else:
                 print("※通知を送る宛先（名簿）が空でした。")
 
-  except Exception as e:
+# ⭕ ここから一番下までを丸ごと上書きします（スペースの数を完全に揃えました）
+    except Exception as e:
         import traceback
         print("❌ エラーの詳細な原因（ここが犯人です！）:")
         traceback.print_exc()
