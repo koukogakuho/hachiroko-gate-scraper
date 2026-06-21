@@ -26,7 +26,7 @@ def run_scraper():
             browser = p.chromium.launch(headless=True)
             page = browser.new_page()
             page.goto(url)
-            page.wait_for_timeout(5000)
+            page.wait_for_timeout(10000)
             
             frame = page.frames[1]
             text = frame.locator("body").inner_text()
@@ -118,9 +118,10 @@ def run_scraper():
             else:
                 print("※通知を送る宛先（名簿）が空でした。")
 
-    # ⚠️ ここが消えていた部分です！
-    except Exception as e:
-        print(f"❌ エラーが発生しました（次回ループで再トライ）: {e}")
+  except Exception as e:
+        import traceback
+        print("❌ エラーの詳細な原因（ここが犯人です！）:")
+        traceback.print_exc()
 
 # ==========================================
 # 🚀 3. スクリプト実行（1回でスパッと終了）
